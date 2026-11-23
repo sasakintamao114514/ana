@@ -306,6 +306,11 @@ const mkChair=()=>{const g=new THREE.Group(),w=mat(tWood,{r:[1,1]}),a=(W,H,D,x,y
 const chairG=mkChair();chairG.position.set(-2.2,0,2.3);chairG.rotation.y=Math.PI+.3;S.add(chairG);
 const chairHit=new THREE.Mesh(new THREE.BoxGeometry(.7,1,.7),new THREE.MeshBasicMaterial({visible:false}));chairHit.position.set(-2.2,.5,2.3);S.add(chairHit);
 const chairCol=[-2.45,-1.95,2.05,2.55];col.push(chairCol);
+const ghostM=new THREE.MeshBasicMaterial({color:0x4dff2a,transparent:true,opacity:.35,depthWrite:false});
+const chairGhost=mkChair();chairGhost.traverse(o=>{if(o.isMesh){o.material=ghostM;o.castShadow=false}});chairGhost.position.copy(chairG.position);chairGhost.rotation.copy(chairG.rotation);chairGhost.visible=false;S.add(chairGhost);
+const ghostRing=new THREE.Mesh(new THREE.RingGeometry(.38,.46,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0x4dff2a,transparent:true,opacity:.6,depthWrite:false}));ghostRing.position.set(-2.2,.012,2.3);ghostRing.visible=false;S.add(ghostRing);
+function tickGhost(t){const v=haveChair;chairGhost.visible=v;ghostRing.visible=v;if(v){ghostM.opacity=.3+.15*Math.sin(t*4);ghostRing.material.opacity=.45+.2*Math.sin(t*4)}}
+
 const heldChair=mkChair();heldChair.scale.setScalar(.55);heldChair.position.set(.4,-.45,-.8);heldChair.rotation.set(-.4,.5,0);heldChair.visible=false;cam.add(heldChair);
 const tiles=[],tileGrid=[],pmT=new THREE.MeshLambertMaterial({color:0xc9ccd0});
 const tCk=cvs((x,w,h)=>{x.strokeStyle='rgba(30,30,30,.9)';x.lineWidth=3;for(let n=0;n<7;n++){x.beginPath();let X=w/2+rn()*40-20,Y=h/2+rn()*40-20;x.moveTo(X,Y);for(let j=0;j<6;j++){X+=rn()*80-40;Y+=rn()*80-40;x.lineTo(X,Y)}x.stroke()}});
@@ -334,41 +339,53 @@ function mkHammer(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.02,.02
 function mkBrush(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.012,.008,.15),MP(0x3a7ac8,50),0,0,0);pc(g,new THREE.BoxGeometry(.016,.01,.035),MP(0xf2f2f2,5),0,.008,.07);return g}
 function mkScrew(){const g=new THREE.Group(),m=MP(0x8a9099,80);pc(g,new THREE.CylinderGeometry(.007,.007,.06,8),m,0,0,0,Math.PI/2);pc(g,new THREE.CylinderGeometry(.014,.014,.006,10),m,0,0,-.033,Math.PI/2);return g}
 function mkNail(){const g=new THREE.Group(),m=MP(0x7d838c,60);pc(g,new THREE.CylinderGeometry(.004,.004,.08,6),m,0,0,0,Math.PI/2);pc(g,new THREE.CylinderGeometry(.01,.01,.004,8),m,0,0,-.042,Math.PI/2);return g}
-function mkPencil(){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.007,.007,.12,6),MP(0xe0b83a,20),0,0,0,Math.PI/2);pc(g,new THREE.ConeGeometry(.007,.02,6),MP(0xe8c9a0,10),0,0,.07,Math.PI/2);pc(g,new THREE.CylinderGeometry(.0072,.0072,.012,6),MP(0xd07a8a,5),0,0,-.065,Math.PI/2);return g}
-function mkButton(){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.014,.014,.004,14),MP(0x2a4a7a,40),0,0,0);return g}
+function mkPencil(c=0xe0b83a){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.007,.007,.12,6),MP(c,20),0,0,0,Math.PI/2);pc(g,new THREE.ConeGeometry(.007,.02,6),MP(0xe8c9a0,10),0,0,.07,Math.PI/2);pc(g,new THREE.CylinderGeometry(.0072,.0072,.012,6),MP(0xd07a8a,5),0,0,-.065,Math.PI/2);return g}
+function mkButton(c=0x2a4a7a){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.014,.014,.004,14),MP(c,40),0,0,0);return g}
 function mkGear(){const g=new THREE.Group(),m=MP(0x6b7078,80);pc(g,new THREE.CylinderGeometry(.03,.03,.01,16),m,0,0,0);for(let i=0;i<8;i++){const a=i*Math.PI/4;pc(g,new THREE.BoxGeometry(.01,.01,.014),m,Math.cos(a)*.033,0,Math.sin(a)*.033)}return g}
-function mkMatch(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.05,.015,.035),MP(0xb23a30,5),0,0,0);pc(g,new THREE.BoxGeometry(.05,.004,.03),MP(0xe8d8a0,5),0,.006,0);return g}
-function mkBattery(){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.012,.012,.05,12),MP(0xc08a3a,60),0,0,0,Math.PI/2);pc(g,new THREE.CylinderGeometry(.005,.005,.006,8),MP(0xc9ced6,90),0,0,.028,Math.PI/2);return g}
-function mkNecklace(){const g=new THREE.Group(),m=MP(0xc8a23c,100);pc(g,new THREE.TorusGeometry(.04,.002,6,24),m,0,0,0,Math.PI/2);pc(g,new THREE.BoxGeometry(.012,.004,.012),MP(0x3a6ac2,100),0,0,.04);return g}
-function mkDice(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.02,.02,.02),MP(0xf2f2f2,30),0,0,0);return g}
+function mkMatch(c=0xb23a30){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.05,.015,.035),MP(c,5),0,0,0);pc(g,new THREE.BoxGeometry(.05,.004,.03),MP(0xe8d8a0,5),0,.006,0);return g}
+function mkBattery(c=0xc08a3a){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.012,.012,.05,12),MP(c,60),0,0,0,Math.PI/2);pc(g,new THREE.CylinderGeometry(.005,.005,.006,8),MP(0xc9ced6,90),0,0,.028,Math.PI/2);return g}
+function mkNecklace(c=0xc8a23c){const g=new THREE.Group(),m=MP(c,100);pc(g,new THREE.TorusGeometry(.04,.002,6,24),m,0,0,0,Math.PI/2);pc(g,new THREE.BoxGeometry(.012,.004,.012),MP(0x3a6ac2,100),0,0,.04);return g}
+function mkDice(c=0xf2f2f2){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.02,.02,.02),MP(c,30),0,0,0);return g}
 function mkCards(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.04,.002,.06),MP(0xf2f2f2,20),0,0,0);pc(g,new THREE.BoxGeometry(.04,.002,.06),MP(0xe8e0d0,20),.004,.002,.003);return g}
 function mkCandle(){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.015,.015,.09,12),MP(0xe8dcc0,10),0,0,0,Math.PI/2);pc(g,new THREE.CylinderGeometry(.002,.002,.012,4),MP(0x222222,5),0,0,.05,Math.PI/2);return g}
 function mkBolt(){const g=new THREE.Group(),m=MP(0x8a9099,80);pc(g,new THREE.CylinderGeometry(.012,.012,.008,6),m,0,0,-.03,Math.PI/2);pc(g,new THREE.CylinderGeometry(.006,.006,.05,8),m,0,0,0,Math.PI/2);return g}
 function mkFork(){const g=new THREE.Group(),m=MP(0xc9ced6,90);pc(g,new THREE.BoxGeometry(.008,.004,.1),m,0,0,-.03);pc(g,new THREE.BoxGeometry(.03,.004,.012),m,0,0,.025);[-.01,0,.01].forEach(x=>pc(g,new THREE.BoxGeometry(.004,.004,.035),m,x,0,.045));return g}
-function mkDriver(){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.014,.014,.06,10),MP(0xe07a2e,20),0,0,-.05,Math.PI/2);pc(g,new THREE.CylinderGeometry(.004,.004,.08,6),MP(0x9aa0a8,90),0,0,.02,Math.PI/2);return g}
-function mkMug(){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.03,.025,.06,16,1,true),new THREE.MeshPhongMaterial({color:0x9aa0a8,shininess:80,side:THREE.DoubleSide}),0,0,0);pc(g,new THREE.TorusGeometry(.018,.004,6,12),MP(0x9aa0a8,80),.04,0,0);return g}
+function mkDriver(c=0xe07a2e){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.014,.014,.06,10),MP(c,20),0,0,-.05,Math.PI/2);pc(g,new THREE.CylinderGeometry(.004,.004,.08,6),MP(0x9aa0a8,90),0,0,.02,Math.PI/2);return g}
+function mkMug(c=0x9aa0a8){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.03,.025,.06,16,1,true),new THREE.MeshPhongMaterial({color:c,shininess:80,side:THREE.DoubleSide}),0,0,0);pc(g,new THREE.TorusGeometry(.018,.004,6,12),MP(c,80),.04,0,0);return g}
 function mkRing(){const g=new THREE.Group();pc(g,new THREE.TorusGeometry(.02,.004,8,18),MP(0xc8a23c,100),0,0,0,Math.PI/2);pc(g,new THREE.OctahedronGeometry(.009),MP(0x66ccff,120),0,.005,-.022);return g}
 function mkGem(c){const g=new THREE.Group();pc(g,new THREE.OctahedronGeometry(.02),new THREE.MeshPhongMaterial({color:c,shininess:140,specular:0xffffff}),0,0,0);return g}
-function mkCap(){const g=new THREE.Group(),m=MP(0x2f4a7a,20);pc(g,new THREE.SphereGeometry(.07,16,10,0,Math.PI*2,0,Math.PI/2),m,0,0,0);pc(g,new THREE.CylinderGeometry(.07,.07,.01,16),m,0,0,0);pc(g,new THREE.BoxGeometry(.09,.008,.05),m,0,0,-.08);return g}
-function mkSock(){const g=new THREE.Group(),m=MP(0xcfcfcf,5);pc(g,new THREE.CylinderGeometry(.03,.028,.12,12),m,0,.05,0);pc(g,new THREE.BoxGeometry(.06,.05,.1),m,0,-.01,.06);pc(g,new THREE.CylinderGeometry(.03,.03,.012,12),MP(0xb03a3a,5),0,.11,0);return g}
-function mkBook(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.1,.025,.14),MP(0x7a3a2a,10),0,0,0);pc(g,new THREE.BoxGeometry(.092,.02,.132),MP(0xf2ead0,5),.004,0,0);return g}
+function mkCap(c=0x2f4a7a){const g=new THREE.Group(),m=MP(c,20);pc(g,new THREE.SphereGeometry(.07,16,10,0,Math.PI*2,0,Math.PI/2),m,0,0,0);pc(g,new THREE.CylinderGeometry(.07,.07,.01,16),m,0,0,0);pc(g,new THREE.BoxGeometry(.09,.008,.05),m,0,0,-.08);return g}
+function mkSock(c=0xcfcfcf){const g=new THREE.Group(),m=MP(c,5);pc(g,new THREE.CylinderGeometry(.03,.028,.12,12),m,0,.05,0);pc(g,new THREE.BoxGeometry(.06,.05,.1),m,0,-.01,.06);pc(g,new THREE.CylinderGeometry(.03,.03,.012,12),MP(0xb03a3a,5),0,.11,0);return g}
+function mkBook(c=0x7a3a2a){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.1,.025,.14),MP(c,10),0,0,0);pc(g,new THREE.BoxGeometry(.092,.02,.132),MP(0xf2ead0,5),.004,0,0);return g}
 function mkCompass(){const g=new THREE.Group();pc(g,new THREE.CylinderGeometry(.035,.035,.012,20),MP(0xb08d3c,90),0,0,0);pc(g,new THREE.CylinderGeometry(.028,.028,.002,20),MP(0xf2f2f2,40),0,.007,0);pc(g,new THREE.BoxGeometry(.004,.002,.04),MP(0xcc2222,10),0,.009,0);return g}
 function mkEraser(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.04,.012,.02),MP(0xf0b0c0,5),0,0,0);return g}
 function mkHarmonica(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.11,.02,.03),MP(0xb9bec6,100),0,0,0);return g}
 function mkPhoto(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.08,.003,.06),MP(0xe8e0c8,5),0,0,0);pc(g,new THREE.BoxGeometry(.065,.004,.045),MP(0x6a7a6a,5),0,0,0);return g}
 function mkOpener(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.012,.01,.1),MP(0x3a3a3a,10),0,0,-.04);pc(g,new THREE.CylinderGeometry(.02,.02,.006,14),MP(0x9aa0a8,90),0,0,.03);return g}
-function mkTowel(){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.1,.025,.07),MP(0x4a9a9a,5),0,0,0);return g}
-function mkBelt(){const g=new THREE.Group();pc(g,new THREE.TorusGeometry(.045,.006,6,20),MP(0x5a3a22,10),0,0,0,Math.PI/2);pc(g,new THREE.BoxGeometry(.018,.01,.012),MP(0xc9ced6,100),0,0,.045);return g}
+function mkTowel(c=0x4a9a9a){const g=new THREE.Group();pc(g,new THREE.BoxGeometry(.1,.025,.07),MP(c,5),0,0,0);return g}
+function mkBelt(c=0x5a3a22){const g=new THREE.Group();pc(g,new THREE.TorusGeometry(.045,.006,6,20),MP(c,10),0,0,0,Math.PI/2);pc(g,new THREE.BoxGeometry(.018,.01,.012),MP(0xc9ced6,100),0,0,.045);return g}
 function mkWire(){const g=new THREE.Group();pc(g,new THREE.TorusGeometry(.04,.002,5,20),MP(0xaab0b8,80),0,0,0,Math.PI/2);return g}
+function mkMarble(c){const g=new THREE.Group();pc(g,new THREE.SphereGeometry(.016,14,10),new THREE.MeshPhongMaterial({color:c,shininess:140,specular:0xffffff,transparent:true,opacity:.9}),0,0,0);return g}
+function mkBowl(c=0xb9bec6){const g=new THREE.Group();pc(g,new THREE.SphereGeometry(.06,18,10,0,Math.PI*2,Math.PI/2,Math.PI/2),new THREE.MeshPhongMaterial({color:c,shininess:90,side:THREE.DoubleSide}),0,.03,0).scale.set(1,.6,1);return g}
 const I=(n,h,mk)=>({n,h,mk,x:0,y:-1,z:0});
 const ITEMS=[I('スープ缶',.06,mkCan),I('石鹸',.02,mkSoap),I('水筒',.05,mkCanteen),I('古いブーツ',.1,mkBoot),I('レンチ',.02,mkWrench),I('古い鍵',.01,mkKey),I('コイン',.01,mkCoin),I('空き瓶',.035,mkBottle),I('懐中電灯',.035,mkLight),I('腕時計',.03,mkWatch),I('ペンチ',.02,mkPliers),I('ロープ',.03,mkRope),I('メガネ',.01,mkGlasses),I('ハンマー',.02,mkHammer),I('歯ブラシ',.01,mkBrush),
 I('ツナ缶',.06,()=>mkCan(0x3a6ac2)),I('ネジ',.015,mkScrew),I('くぎ',.01,mkNail),I('鉛筆',.01,mkPencil),I('ボタン',.01,mkButton),I('歯車',.015,mkGear),I('マッチ箱',.015,mkMatch),I('電池',.015,mkBattery),I('ネックレス',.01,mkNecklace),I('サイコロ',.015,mkDice),I('トランプ',.01,mkCards),I('ろうそく',.02,mkCandle),I('ボルト',.015,mkBolt),I('フォーク',.01,mkFork),I('ドライバー',.02,mkDriver),I('マグカップ',.035,mkMug),I('コイン袋',.02,mkCoin),
 I('トマト缶',.06,()=>mkCan(0xe0402a)),I('コーン缶',.06,()=>mkCan(0xe0c030)),I('豆の缶詰',.06,()=>mkCan(0x3a9a4a)),I('ピンクの石鹸',.02,()=>mkSoap(0xf0a8c0,0xe090aa)),I('古い瓶',.035,()=>mkBottle(0x6a4a2a)),I('銀の鍵',.01,()=>mkKey(0xc9ced6)),I('金貨',.01,()=>mkCoin(0xf0c030)),I('銀貨',.01,()=>mkCoin(0xc9ced6)),
 I('指輪',.01,mkRing),I('宝石',.02,()=>mkGem(0x55ccff)),I('赤い宝石',.02,()=>mkGem(0xe03050)),I('帽子',.04,mkCap),I('靴下',.04,mkSock),I('ノート',.02,mkBook),I('コンパス',.02,mkCompass),I('消しゴム',.01,mkEraser),
-I('ハーモニカ',.02,mkHarmonica),I('写真',.005,mkPhoto),I('缶切り',.015,mkOpener),I('タオル',.02,mkTowel),I('ベルト',.01,mkBelt),I('針金',.01,mkWire),I('古いスプーン',.01,()=>mkSpoon()),I('青い瓶',.035,()=>mkBottle(0x3a6ac8))];
-function scatter(){const cells=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++)cells.push([c,r]);
+I('ハーモニカ',.02,mkHarmonica),I('写真',.005,mkPhoto),I('缶切り',.015,mkOpener),I('タオル',.02,mkTowel),I('ベルト',.01,mkBelt),I('針金',.01,mkWire),I('古いスプーン',.01,()=>mkSpoon()),I('青い瓶',.035,()=>mkBottle(0x3a6ac8)),
+I('サバ缶',.06,()=>mkCan(0x2a5aa0)),I('ミートボール缶',.06,()=>mkCan(0xa04a2a)),I('ビーツ缶',.06,()=>mkCan(0x8a2a5a)),I('フルーツ缶',.06,()=>mkCan(0xe08a2a)),
+I('緑の石鹸',.02,()=>mkSoap(0x9ad0a0,0x7ab080)),I('黄色い石鹸',.02,()=>mkSoap(0xf0e080,0xe0cc60)),I('赤い瓶',.035,()=>mkBottle(0xa03030)),I('透明な瓶',.035,()=>mkBottle(0xcfe8f0)),
+I('金の鍵',.01,()=>mkKey(0xf0c030)),I('錆びた鍵',.01,()=>mkKey(0x8a5a3a)),I('銅貨',.01,()=>mkCoin(0xb06a3a)),I('古い硬貨',.01,()=>mkCoin(0x8a7a5a)),
+I('緑の宝石',.02,()=>mkGem(0x30c070)),I('紫の宝石',.02,()=>mkGem(0x9a40d0)),I('黄色い宝石',.02,()=>mkGem(0xf0d030)),
+I('赤い本',.02,()=>mkBook(0xa03030)),I('青い本',.02,()=>mkBook(0x2a4a9a)),I('緑の本',.02,()=>mkBook(0x2a7a4a)),I('赤い帽子',.04,()=>mkCap(0xa02a2a)),I('黒い帽子',.04,()=>mkCap(0x222222)),
+I('黒い靴下',.04,()=>mkSock(0x2a2a2a)),I('青い靴下',.04,()=>mkSock(0x3a5aa0)),I('赤いタオル',.02,()=>mkTowel(0xa03a3a)),I('白いタオル',.02,()=>mkTowel(0xeeeeee)),
+I('赤いボタン',.01,()=>mkButton(0xc02a2a)),I('緑のボタン',.01,()=>mkButton(0x2a9a4a)),I('青いビー玉',.016,()=>mkMarble(0x3a7ae8)),I('赤いビー玉',.016,()=>mkMarble(0xe03a3a)),I('緑のビー玉',.016,()=>mkMarble(0x3ac870)),
+I('赤いサイコロ',.015,()=>mkDice(0xc02a2a)),I('お椀',.03,()=>mkBowl(0xb9bec6)),I('金色のお椀',.03,()=>mkBowl(0xd8b040)),I('青いマッチ箱',.015,()=>mkMatch(0x2a4aa0)),
+I('青いドライバー',.02,()=>mkDriver(0x2a6ac8)),I('緑の電池',.015,()=>mkBattery(0x3a9a4a)),I('青い鉛筆',.01,()=>mkPencil(0x3a6ac8)),I('銀のネックレス',.01,()=>mkNecklace(0xc9ced6)),I('黒いベルト',.01,()=>mkBelt(0x222222)),
+I('白いマグカップ',.035,()=>mkMug(0xf2f2f2)),I('青いマグカップ',.035,()=>mkMug(0x3a6ac8))];
+function scatter(){const cells=[];for(let r=0;r<10;r++)for(let c=0;c<10;c++)cells.push([c,r]);
  for(let i=cells.length-1;i>0;i--){const j=Math.floor(rn()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]]}
- ITEMS.forEach((it,k)=>{const q=cells[k];it.x=-1+(q[0]+.5)/4+(rn()-.5)*.2;it.z=-.4+(q[1]+.5)/4+(rn()-.5)*.2;const t0=it.top+.1;it.y=-(t0+Math.pow(rn(),1.3)*(2.0-t0));it.m.position.set(it.x,it.y,it.z);it.m.rotation.y=rn()*6.28})}
+ ITEMS.forEach((it,k)=>{const q=cells[k];it.x=-1+(q[0]+.5)/5+(rn()-.5)*.2;it.z=-.4+(q[1]+.5)/5+(rn()-.5)*.2;const t0=it.top+.1;it.y=-(t0+Math.pow(rn(),1.3)*(2.0-t0));it.m.position.set(it.x,it.y,it.z);it.m.rotation.y=rn()*6.28;it.m.visible=false})}
 ITEMS.forEach(it=>{it.m=it.mk();it.m.position.set(it.x,it.y,it.z);it.m.rotation.y=rn()*6.28;S.add(it.m);it.hit=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial({visible:false}));S.add(it.hit);it.found=false;it.got=false;it.st='buried';it.slot=-1});
 const glowM=new THREE.MeshBasicMaterial({color:0xffe28a,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false});
 ITEMS.forEach(it=>{it.m.scale.setScalar(1.8);it.m.position.set(0,0,0);it.m.updateMatrixWorld(true);{const bb=new THREE.Box3().setFromObject(it.m);it.top=(bb.max.y>0&&isFinite(bb.max.y))?bb.max.y:it.h*1.8}it.m.traverse(o=>{if(o.material&&o.material.emissive)o.material.emissive.setHex(0x2a2a2a)});it.glow=new THREE.Mesh(new THREE.SphereGeometry(.09,12,10),glowM);it.glow.visible=false;S.add(it.glow)});
@@ -392,11 +409,12 @@ const MAXH=5,held=()=>ITEMS.filter(i=>i.st==='bag'||i.st==='table').length;
 const tpG=new THREE.CylinderGeometry(.055,.055,.1,14),tpM=new THREE.MeshLambertMaterial({color:0xf6f6f0}),tpR=[];
 function syncTP(){while(tpR.length<Math.min(tp,40)){const i=tpR.length,m=new THREE.Mesh(tpG,tpM);m.position.set(-1.3+(i%5)*.13,.05+Math.floor(i/10)*.1,-3.25+Math.floor(i/5%2)*.13);m.castShadow=true;S.add(m);tpR.push(m)}while(tpR.length>Math.min(tp,40))S.remove(tpR.pop())}
 function addTP(r){tp+=r;syncTP()}
-function callGuard(){if(gState!=='away'){toast('警備員はもう来ている');return}gTx=Math.max(-3,Math.min(3,px));gState='coming';guardM.visible=true;guardM.position.set(13.5,0,5.8);toast('ガンガン！警備員を呼んだ…')}
+function callGuard(){if(gState!=='away'){toast('警備員はもう来ている');return}
+ if(!ITEMS.some(i=>i.st==='bag'||i.st==='table')){toast('警備員「渡す物がないなら呼ぶな」');return}gTx=Math.max(-3,Math.min(3,px));gState='coming';guardM.visible=true;guardM.position.set(13.5,0,5.8);toast('ガンガン！警備員を呼んだ…')}
 function giveGuard(){const l=ITEMS.filter(i=>i.st==='table');
  if(l.length){l.forEach(i=>{i.st='gone';i.m.visible=false});const r=Math.ceil(l.length/2);addTP(r);toast('警備員「'+l.length+'個か。トイレットペーパーを'+r+'個やる」');gT=Math.max(gT,8);setDepth();return}
  if(doorOpen){toast('警備員「もう開いているだろう」');gT=.6;return}
- doorOpen=true;retT=60;toast('警備員「監獄を開けておく。1分後にまた会おう」');gT=Math.min(gT,3);setDepth()}
+ doorOpen=true;retT=45;toast('警備員「監獄を開けておく。45秒後にまた会おう」');gT=Math.min(gT,3);setDepth()}
 function tickGuard(dt){
  doorA+=((doorOpen?1:0)-doorA)*Math.min(1,dt*3);doorG.rotation.y=doorA*1.57;
  if(doorOpen&&!gReturn&&state==='play'){retT-=dt;if(retT<=5&&gState==='away'){gReturn=true;gTx=1.5;gState='coming';guardM.visible=true;guardM.position.set(13.5,0,5.8)}}
@@ -444,17 +462,17 @@ function promptInfo(){const a=aim;
  if(a==='put')return['机','持ち物を置く'];
  if(a==='rug')return['カーペット',covered?'どける':'元に戻す'];
  if(a==='give'){const n=ITEMS.filter(i=>i.st==='table').length;return['警備員',n?'渡す':(!doorOpen?'独房を開けてもらう':'もう開いている')]}
- if(a==='bars')return['鉄格子','叩いて警備員を呼ぶ'];
+ if(a==='bars')return ITEMS.some(i=>i.st==='bag'||i.st==='table')?['鉄格子','叩いて警備員を呼ぶ']:['鉄格子','アイテムがないと看守は来ない',1];
  if(a==='trade')return tp>=3?['囚人','紙3個でシャベルをもらう']:['囚人','紙が3個必要（今'+tp+'個）',1];
  return null}
-function outlineFor(){switch(aim){case'pick':return spoonT?spoon:shovelT?shovelW:chairG;case'item':return itemTarget.m;case'tile':return tileTarget;case'pile':return pileG;case'toilet':return toiletAt?toilet2G:tbowl;case'give':return guardM;case'trade':return pris[0];case'put':return tableTop;case'rug':return covered?flat:roll}return null}
+function outlineFor(){switch(aim){case'pick':return spoonT?spoon:shovelT?shovelW:chairG;case'item':return itemTarget.m;case'tile':return tileTarget;case'pile':return pileG;case'toilet':return toiletAt?toilet2G:tbowl;case'give':return guardM;case'trade':return pris[0];case'put':return tableTop;case'rug':return covered?flat:roll;case'backchair':return chairGhost}return null}
 let lastPk='';
 function dkey(){return aim==='pick'?(spoonT?'pickS':chairT?'pickC':'pickV'):aim}
 function uiAim(){let pi=promptInfo();if(pi&&!pi[2]&&did[dkey()])pi=null;const pk=pi?pi.join('|'):'';setOutline(outlineFor());if(pk===lastPk)return;lastPk=pk;
  if(pi){$('pn').textContent=pi[0];$('pv').innerHTML='<b>●</b>'+pi[1];$('pr').style.display='block'}else $('pr').style.display='none'}
 function hintText(){const d=did,a=aim;if(a!=='')return'';
  if(a==='item'){if(itemTarget.st!=='table'&&held()>=MAXH)return'持ち物がいっぱい（5個）。警備員と交換しよう';if(d.item)return'';return itemTarget.st==='table'?'「取る」で'+itemTarget.n+'を机から取る':'「拾う」で出てきた物を拾う'}
- if(a==='give'){if(d.give)return'';const n=ITEMS.filter(i=>i.st==='table').length;return n?'「渡す」で机の物を全部警備員に渡す（'+n+'個→紙'+Math.ceil(n/2)+'個）':(!doorOpen?'「開けて」で独房を開けてもらう（1分間）':'独房はもう開いている')}
+ if(a==='give'){if(d.give)return'';const n=ITEMS.filter(i=>i.st==='table').length;return n?'「渡す」で机の物を全部警備員に渡す（'+n+'個→紙'+Math.ceil(n/2)+'個）':(!doorOpen?'「開けて」で独房を開けてもらう（45秒間）':'独房はもう開いている')}
  if(a==='bars')return d.bars?'':'「叩く」で鉄格子を叩いて警備員を呼ぶ';
  if(a==='trade'){if(tp<3)return'囚人「シャベルは紙3個と交換だ」（今'+tp+'個）';return d.trade?'':'「渡す」で紙3個を渡して囚人からシャベルをもらう'}
  if(a==='put')return d.put?'':'「置く」で持ち物を机に全部置く';
@@ -469,17 +487,18 @@ function hintText(){const d=did,a=aim;if(a!=='')return'';
  if(a==='toilet')return d.toilet?'':'「流す」でトイレに流す';
  if(a==='dig'){if(pile>=PILE_MAX)return'土がいっぱい！山をすくってトイレに流そう';return d.dig?'':'「掘る」を押している間、少しずつ掘れる'}
  if(doorOpen)return'独房の扉が開いている（あと'+Math.max(0,Math.ceil(retT))+'秒）';
- if(!d.rugOff)return'カーペットに照準を合わせて「どける」で外そう';
+ if(!d.rugOff)return'カーペットをどけよう';
  if(!d.pickC)return'机のそばのイスを取ろう';
- if(!d.tiles)return haveChair?'床のタイルに照準を合わせよう':'イスを持って床のタイルを壊そう';
- if(!d.pickS&&!d.pickV)return'洗面台の横のコップからスプーンを取ろう';
- if(!d.dig)return haveSpoon?'土に照準を合わせて掘ろう':'スプーンを持って土を掘ろう';
+ if(!d.tiles)return haveChair?'イスでタイルを壊そう':'イスを持って床のタイルを壊そう';
+ if(haveChair&&!d.backchair)return'イスを戻して（緑の目印の場所）';
+ if(!d.pickS&&!d.pickV&&!haveChair)return'洗面台の横のコップからスプーンを取ろう';
+ if(!d.dig)return haveSpoon?'土を掘ろう':'スプーンを持って土を掘ろう';
  if(carry>0&&!d.toilet)return'手の土をトイレに流そう';
  if(pile>=PILE_MAX&&!d.pile)return'土の山をすくおう';
  return''}
 const rugHit=new THREE.Mesh(new THREE.BoxGeometry(2.6,.25,2.6),new THREE.MeshBasicMaterial({visible:false}));rugHit.position.set(0,.12,.6);S.add(rugHit);
 const rollHit=new THREE.Mesh(new THREE.BoxGeometry(.6,.5,2.2),new THREE.MeshBasicMaterial({visible:false}));rollHit.position.set(1.9,.25,.6);S.add(rollHit);
-function checkItems(){ITEMS.forEach(it=>{if(it.st==='buried'&&soilH(it.x,it.z)<it.y+it.top){it.st='found';it.found=true;it.m.position.y+=.03;it.hit.position.copy(it.m.position);it.hit.scale.set(.22,.18,.22);burst(it.m.position,8);toast(it.n+'が出てきた！')}})}
+function checkItems(){ITEMS.forEach(it=>{if(it.st!=='buried')return;const h=soilH(it.x,it.z);if(h<it.y+it.top+.25)it.m.visible=true;if(h<it.y+it.top){it.st='found';it.found=true;it.m.position.y+=.03;it.hit.position.copy(it.m.position);it.hit.scale.set(.22,.18,.22);burst(it.m.position,8);toast(it.n+'が出てきた！')}})}
 const cupHit=new THREE.Mesh(new THREE.BoxGeometry(.4,.35,.35),new THREE.MeshBasicMaterial({visible:false}));cupHit.position.set(1.45,1.05,-3.38);S.add(cupHit);
 const bedHit=new THREE.Mesh(new THREE.BoxGeometry(1.2,.7,2.2),new THREE.MeshBasicMaterial({visible:false}));bedHit.position.set(-2.8,.35,-2.4);S.add(bedHit);
 function placeSpoon(w){if(w==='bed'){spoon.position.set(-2.75,.016,-2.1);spoon.rotation.set(0,.7,0);spoonHit.position.set(-2.75,.12,-2.1);spLight.intensity=.25;spLight.position.set(0,.3,0)}else{spoon.position.set(1.45,1.07,-3.38);spoon.rotation.set(-Math.PI/2,0,.12);spoonHit.position.set(1.45,1.1,-3.38);spLight.intensity=.6;spLight.position.set(0,-.25,0)}}
@@ -522,7 +541,7 @@ function act(){if(state!=='play'||digCd>0)return;
  if(aim==='pick'){if(spoonT)pickSpoon();else if(chairT)pickChair();else if(shovelT)pickShovel();digHold=0;return}
  if(aim==='rug'){toggleRug();digCd=.4;return}
  if(aim==='tile'&&tileTarget){const t=tileTarget,u=t.userData;u.hp--;digCd=.45;swing=1;burst(t.position,u.hp>0?5:12,pmT);
-  if(u.hp>0){u.ck.material.opacity=1-u.hp/3}else{tileGrid[u.i][u.j]=null;t.visible=false;tiles.splice(tiles.indexOf(t),1);tilesLeft--;if(tilesLeft<=0)did.tiles=1;burst(t.position,8);setDepth()}
+  if(u.hp>0){u.ck.material.opacity=1-u.hp/3}else{tileGrid[u.i][u.j]=null;t.visible=false;tiles.splice(tiles.indexOf(t),1);tilesLeft--;if(tilesLeft<=0){did.tiles=1;toast('タイルを全部壊した！イスを戻して')}burst(t.position,8);setDepth()}
   return}
  if(aim==='item'&&itemTarget){const it=itemTarget;
   if(it.st==='table'){it.got=true;it.st='bag';it.slot=-1;it.m.visible=false;burst(it.m.position,4);toast(it.n+'を机から取った')}
@@ -585,7 +604,7 @@ function step(dt){
  lbl.textContent=doorOpen?'独房の扉が開いている（あと'+Math.max(0,Math.ceil(retT))+'秒）':!did.rugOff?'カーペットをどけよう':!did.pickC?'イスを取ろう':!did.tiles?'タイルを壊そう':'床を掘って脱出しよう';
  {const bl=aim==='rug'?(covered?'どける':'戻す'):aim==='give'?(ITEMS.some(i=>i.st==='table')?'渡す':'開けて'):aim==='bars'?'叩く':aim==='put'?'置く':aim==='trade'?'渡す':aim==='back'||aim==='backchair'||aim==='backshovel'?'戻す':aim==='bed'?'隠す':aim==='item'?(itemTarget.st==='table'?'取る':'拾う'):aim==='pick'?'取る':aim==='tile'?'壊す':aim==='pile'?'すくう':aim==='toilet'?'流す':none?'取る':haveChair?'壊す':'掘る';if(bl!==lastBl){$('bd').textContent=bl;lastBl=bl}}
 }
-function loop(n){const dt=Math.min((n-last)/1000,.1);last=n;step(dt);tickParts(dt);rugAnim(dt);tickWater(dt);tickPris(n/1000);tickGuard(dt);tickGlow(n/1000);tickMark(n/1000);drawFrame();requestAnimationFrame(loop)}
+function loop(n){const dt=Math.min((n-last)/1000,.1);last=n;step(dt);tickParts(dt);rugAnim(dt);tickWater(dt);tickPris(n/1000);tickGuard(dt);tickGlow(n/1000);tickGhost(n/1000);tickMark(n/1000);drawFrame();requestAnimationFrame(loop)}
 // 入力（タッチ専用）
 const jb=$('jb'),jk=$('jk'),JR=55;let jx=0,jy=0,lx=0,ly=0;
 wrap.addEventListener('pointerdown',e=>{
@@ -603,7 +622,7 @@ bd.addEventListener('pointerdown',e=>{e.preventDefault();digHold=1;act()});
 
 addEventListener('contextmenu',e=>e.preventDefault());
 ov.addEventListener('pointerdown',e=>{e.stopPropagation();if(state!=='play'){init();try{const el=document.documentElement,p=el.requestFullscreen&&el.requestFullscreen();if(p&&p.catch)p.catch(()=>{})}catch(_){}}});
-ov.innerHTML='<b>穴を掘って刑務所脱獄</b><span>最初は何も持っていない。<br>カーペットをどけて、机のそばのイスでタイルを壊し、洗面台横のコップのスプーンで土を掘って脱出しよう。</span><span>画面の左側ドラッグ：移動　右側ドラッグ：見回し<br>「掘る」を押している間、照準の土が少しずつ削れる　「戻す」でカーペットを敷く／どける</span><span>横向きでプレイ推奨・タップで開始</span>';
+ov.innerHTML='<b>穴を掘って刑務所脱獄</b><span>最初は何も持っていない。<br>カーペットをどけて、机のそばのイスでタイルを壊し、洗面台横のコップのスプーンで土を掘って脱出しよう。</span><span>画面の左側ドラッグ：移動　右側ドラッグ：見回し<br>「掘る」を押している間、土が少しずつ削れる</span><span>横向きでプレイ推奨・タップで開始</span>';
 requestAnimationFrame(loop);
 </script>
 </body>
